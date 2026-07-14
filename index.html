@@ -1,1 +1,179 @@
-<title> AFA </title>
+<!--
+
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⢧⣿⣿⣮⡙⢿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⡻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⣿⣿⣿⣿⢷⣮⣛⣿⠟⣣⢸⣿⣿⣿⢨⣽⣿⣛⣛⠿⠼⣿⣦⡻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⣿⣿⣿⣏⡎⠿⣫⣵⣿⣯⣴⣶⣯⣭⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣎⠁⣨⣽⣛⣛⣛⣿⣿⢿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⡾⣿⣿⡿⣸⣧⣾⣿⣿⣿⣿⣿⣿⣇⣭⣣⣿⡍⣭⣭⣻⣿⣿⣿⢟⣻⠾⢸⣿⣿⣿⣿⣿⢋⣾⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⡿⢟⡡⣿⣿⣿⣿⣿⡿⠿⢿⢿⣿⠌⡻⠿⡿⣨⣽⣭⣎⢛⣵⣾⣿⣿⣶⣮⣝⡛⠟⣡⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⠿⢟⣛⣭⣶⣿⣿⣿⠹⣿⣝⠻⠿⠟⠃⠰⣤⠓⠒⠀⣚⣠⣿⠹⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⡿⢶⣭⢛⣿⣿
+⣿⣿⣿⣇⢺⣟⠿⣿⣿⣿⣿⣿⣿⡖⣶⣾⣥⡇⠀⢀⠀⣻⣿⣧⢸⣿⣿⣿⣤⣛⢋⣾⣿⣿⣿⣿⣿⠿⢭⣉⣾⢟⡅⣾⣿⣿
+⣿⣿⣿⣿⣧⡹⣷⣮⠭⣛⣽⣿⣿⠇⣿⣿⣿⣷⣮⣽⣿⣿⣿⣿⠈⢻⣿⣿⣿⣿⣶⣟⣛⣿⢛⣷⣮⣘⠿⣫⣵⢋⣼⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣎⡻⣶⣶⠇⢞⣹⣿⣷⣔⢾⣽⣿⣿⣿⣿⣿⡟⣀⣀⡻⣿⣿⣿⣿⣿⡋⣴⣿⡿⠷⠶⣊⡽⣣⣾⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣶⣭⣛⣛⡛⣻⣿⡿⢂⣿⣿⣿⡿⢛⣡⣾⣿⣿⣿⡷⢌⠽⠟⠛⠓⠘⢻⣓⣸⢟⣩⣾⣿⣿⡿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⡿⠿⠿⢿⣿⣿⠂⢝⣠⡖⠀⠉⠀⠚⠃⠈⠿⠟⣋⠛⢤⠀⠀⠀⠀⠀⢀⡸⠟⢴⣿⣿⣿⣿⡟⡄⣿⠟⣱
+⣿⣿⣿⠟⣫⣵⣶⣿⡿⣫⣾⣿⣿⣿⣿⠟⣡⣤⣀⣀⣀⡀⢤⣿⢡⣿⣎⠷⠀⢰⣶⣶⡟⢁⣶⣶⣷⠹⣿⣿⣿⣷⡇⢫⣾⣿
+⣽⣿⣷⣾⣿⣿⣿⣿⣶⣶⣶⣭⡻⢿⢧⣾⣿⣿⣿⣝⡻⢯⣀⣥⡛⢷⣶⣄⢠⣼⣿⡟⣴⣿⣿⣿⣿⣦⣿⣿⣿⠸⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣋⣤⣼⣿⣿⣿⣿⣿⣿⣶⣍⡻⢶⣭⣿⢸⢹⣿⣿⣱⣿⣿⣿⣿⣿⢸⣿⣿⣿⣷⠻⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣥⣞⠻⢿⡇⣯⣭⡻⣿⣿⣿⣿⣿⣿⣷⣮⣛⠻⢸⣿⣇⣿⣿⣿⣿⣿⢧⣿⣿⣿⣿⣿⣷⡉⢿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⣫⣴⣿⣿⢣⣿⣿⣿⣶⣝⡻⣿⣿⣿⣿⣿⣿⣿⣶⣽⣘⠿⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⢸⣿
+⣿⣿⣿⣿⣿⣿⣿⢟⣴⣾⣿⣿⣿⠟⣼⣿⣿⣿⣿⣿⣿⣶⣝⡻⢿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣭⣥⣃⣻⣿⣿⣿⣿⣿⣿⣸⣿⠀⠀⠀
+
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Official Homepage for The AFA, Providing Support & Official Certification for Those in The Pride Community.">
+  <meta name="author" content="Niko">
+  <title>AFA | American Femboy Association</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <style>
+    html { line-height: 1.15; -webkit-text-size-adjust: 100%; overflow-y: overlay; }
+    body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        font-weight: var(--fontWeightRegular);
+        line-height: 1.5;
+        --horizontal-margin: 20%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: var(--bg1);
+        color: var(--fg0);
+    }
+    :root {
+        --fontWeightBold: 700; 
+        --fontWeightSemiBold: 600; 
+        --fontWeightRegular: 400;
+        --accent: #4a9c8f;
+        --accentPurple: #4a9c8f;
+        --accentBlue: #5eb8a6;
+    }
+
+    .dark, :root {
+        --bg0: #1d2021; 
+        --bg1: #282828; 
+        --bg2: #282828; 
+        --bg3: #3c3836;
+        --fg0: #d4be98; 
+        --grey1: #918274;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 20px; }
+    ::-webkit-scrollbar-thumb:hover { background: #5eb8a6; }
+
+    h1, h2, h3, h4 { font-weight: var(--fontWeightSemiBold); letter-spacing: -0.02em; }
+    .p-display { font-size: 6em; font-weight: var(--fontWeightBold); letter-spacing: -0.02em; line-height: 7.25rem; }
+    .p-l { font-size: 1.25em; }
+
+    nav { background-color: var(--bg0); position: sticky; top: 0; z-index: 999; }
+    .nav-content {
+        display: flex; justify-content: space-between; align-items: center;
+        margin: 0 var(--horizontal-margin); padding: 1.25rem 0;
+    }
+
+    footer {
+        margin-top: auto;
+        background-color: var(--bg0);
+        padding: 2.5rem 0;
+    }
+    .content {
+        display: flex; justify-content: space-between; align-items: center;
+        margin: 0 var(--horizontal-margin);
+    }
+
+    @media (max-width: 1200px) { body { --horizontal-margin: 5%; } }
+    @media (max-width: 600px) {
+        .p-display { font-size: 4.2em; }
+        .nav-content { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body class="dark">
+  <nav>
+    <div class="nav-content">
+      <div>
+        <img src="https://i.imgur.com/dAKIlnl.png" alt="AFA Logo" style="height: 140px;">
+      </div>
+      <div style="display: flex; gap: 2.5rem; font-size: 1.1rem;">
+        <a href="#" style="color: var(--fg0);">Home</a>
+        <a href="#" style="color: var(--fg0);">Report</a>
+        <a href="#" style="color: var(--fg0);">Guidelines</a>
+        <a href="#" style="color: var(--fg0);">Servers</a>
+      </div>
+    </div>
+  </nav>
+  <section style="background-color: var(--bg0); padding: 7rem 0 5rem; text-align: center;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 var(--horizontal-margin);">
+      <h1 class="p-display" style="margin-bottom: 1.5rem;">American Femboy Association</h1>
+      <p class="p-l" style="max-width: 720px; margin: 0 auto; color: var(--grey1); font-size: 1.35rem;">
+        We fight for the rights and safety of homosexuals and the LGBTQ+ community.
+      </p>
+      <div style="margin-top: 3rem;">
+        <a href="https://en.wikipedia.org/wiki/Femboy" style="background: var(--accent); color: white; padding: 1.25rem 3rem; border-radius: 9999px; font-size: 1.25rem; font-weight: 600;">
+          Learn More about Femboy's
+        </a>
+      </div>
+    </div>
+  </section>
+  <section style="padding: 5rem 0; background-color: var(--bg1);">
+    <div style="max-width: 900px; margin: 0 auto; padding: 0 var(--horizontal-margin); text-align: center;">
+      <h2 style="font-size: 3rem; margin-bottom: 2rem;">Our Mission</h2>
+      <p class="p-l" style="color: var(--grey1); font-size: 1.35rem; line-height: 1.7;">
+        The AFA (American Femboy Association) exists to advocate for the rights and dignity of homosexuals. 
+        We push for better legal protections, increased positive visibility, and safer online spaces.
+      </p>
+    </div>
+  </section>
+  <section style="padding: 5rem 0; background-color: var(--bg2);">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 0 var(--horizontal-margin);">
+      <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.8rem;">What We Do</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 3rem;">
+        <div>
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Rights Advocacy</h3>
+          <p style="color: var(--grey1);">Fighting for equal rights and protections for homosexuals.</p>
+        </div>
+        <div>
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Safe Communities</h3>
+          <p style="color: var(--grey1);">Listing trusted servers that accepts our Community.</p>
+        </div>
+        <div>
+          <h3 style="color: var(--accent); margin-bottom: 1rem;">Official Licensing</h3>
+          <p style="color: var(--grey1);">Providing Long Lasting Official Certifications, and More.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section style="padding: 5rem 0; background-color: var(--bg1); text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 0 var(--horizontal-margin);">
+      <h2 style="font-size: 2.6rem; margin-bottom: 1.5rem;">Official AFA Certification</h2>
+      <p style="font-size: 1.25rem; color: var(--grey1); margin-bottom: 2rem;">
+        Want to be Officially Certified as A Feminine Boy? <br>
+        Email us and we’ll send you your License.
+      </p>
+      <a href="mailto:afa.foundation@nycmail.com" 
+         style="background: var(--accent); color: white; padding: 1.1rem 2.8rem; border-radius: 9999px; font-size: 1.2rem; font-weight: 600; display: inline-block;">
+        Email
+      </a>
+    </div>
+  </section>
+  <footer>
+    <div class="content">
+      <div>
+        <img src="https://i.pinimg.com/1200x/b8/33/cd/b833cdf0777a7c532a9119ab68bd73ec.jpg" alt="AFA Logo" style="height: 48px;">
+        <p style="margin-top: 0.8rem; color: var(--grey1);">This Website is NOT Satire, we do fight for the rights of the community.</p>
+      </div>
+      <div style="text-align: right; color: var(--grey1); font-size: 0.95rem;">
+        © 2026 AFA • All Rights Reserved<br>
+        <a href="mailto:afa.foundation@nycmail.com" style="color: var(--accent);">afa.foundation@nycmail.com</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
