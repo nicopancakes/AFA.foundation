@@ -25,12 +25,6 @@ Disallow: /
 User-agent: anthropic-ai
 Disallow: /
 
-User-agent: Google-Extended
-Disallow: /
-
-User-agent: GoogleOther
-Disallow: /
-
 User-agent: CCBot
 Disallow: /
 
