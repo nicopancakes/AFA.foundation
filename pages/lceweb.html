@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LCE v0.0.9</title>
+<style>
+  body {
+    background: #f0f0f0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .top-frame {
+    background: #f0f0f0;
+    border-bottom: 2px groove #ccc;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+  }
+  .top-frame button {
+    width: 70px;
+    margin: 5px;
+    padding: 4px 0;
+  }
+  .top-frame .title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-left: 20px;
+  }
+  .section {
+    border: 1px solid #999;
+    margin: 15px;
+    padding: 10px;
+    background: #f0f0f0;
+  }
+  .section > .legend {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  label { display: block; margin: 5px 0; font-size: 13px; }
+  textarea {
+    width: 98%;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    margin: 5px 0;
+  }
+  input[type=text], input[type=password] {
+    font-family: Consolas, monospace;
+    font-size: 14px;
+    width: 140px;
+    padding: 3px;
+    margin: 5px 0 10px 0;
+  }
+  .action-btn {
+    font-weight: bold;
+    background: #e0e0e0;
+    padding: 8px 16px;
+    margin: 12px 0;
+    cursor: pointer;
+    border: 1px solid #888;
+  }
+  .btn-row { margin: 8px 0; }
+  .status {
+    border-top: 1px solid #999;
+    background: #e0e0e0;
+    padding: 4px 8px;
+    font-size: 12px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .file-label {
+    font-size: 12px;
+    margin-left: 10px;
+    color: #333;
+  }
+  .container { padding-bottom: 30px; }
+</style>
+</head>
+<body>
+
+<div class="top-frame">
+  <button onclick="window.close()">Back</button>
+  <button onclick="resetFields()">New</button>
+  <span class="title">LCE v0.0.9</span>
+</div>
+
+<div class="container">
+
+  <div class="section">
+    <div class="legend">Encode Message</div>
+    <label>Message:</label>
+    <textarea id="msgEntry" rows="6"></textarea>
+
+    <label>Password (1-5 digits only):</label>
+    <input type="text" id="encPass" maxlength="5">
+    <br>
+    <button class="action-btn" onclick="encodeAndSave()">Save As</button>
+  </div>
+
+  <div class="section">
+    <div class="legend">Decode Audio</div>
+    <div class="btn-row">
+      <button onclick="document.getElementById('fileInput').click()">Load Audio File</button>
+      <input type="file" id="fileInput" accept=".wav" style="display:none" onchange="loadFile(event)">
+      <span class="file-label" id="fileLabel"></span>
+    </div>
+
+    <label>Password:</label>
+    <input type="text" id="decPass" maxlength="5">
+    <br>
+    <button class="action-btn" onclick="decrypt()">Decrypt Audio</button>
+
+    <label>Decrypted Message:</label>
+    <textarea id="resultBox" rows="8" readonly></textarea>
+  </div>
+
+</div>
+
+<div class="status" id="status">Ready</div>
+
+<script>
+const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_+-=,./?;'\"[]{}<>";
+const CHAR_TO_IDX = {};
+const IDX_TO_CHAR = {};
+for (let i = 0; i < CHARS.length; i++) {
+  CHAR_TO_IDX[CHARS[i]] = i;
+  IDX_TO_CHAR[i] = CHARS[i];
+}
+
+class NumpyRandom {
+  constructor(seed) {
+    this.mt = new Uint32Array(624);
+    this.mti = 624;
+    this.initGenrand(Math.abs(Math.floor(seed)) >>> 0);
+  }
+
+  initGenrand(s) {
+    this.mt[0] = s >>> 0;
+    for (let i = 1; i < 624; i++) {
+      const prev = this.mt[i - 1] ^ (this.mt[i - 1] >>> 30);
+      const mult = (BigInt(prev >>> 0) * 1812433253n + BigInt(i)) & 0xffffffffn;
+      this.mt[i] = Number(mult);
+    }
+    this.mti = 624;
+  }
+  generate() {
+    const N = 624, M = 397;
+    const MATRIX_A = 0x9908b0df, UPPER_MASK = 0x80000000, LOWER_MASK = 0x7fffffff;
+    const mt = this.mt;
+    let kk;
+    for (kk = 0; kk < N - M; kk++) {
+      const y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+      mt[kk] = mt[kk + M] ^ (y >>> 1) ^ ((y & 1) ? MATRIX_A : 0);
+    }
+    for (; kk < N - 1; kk++) {
+      const y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+      mt[kk] = mt[kk + (M - N)] ^ (y >>> 1) ^ ((y & 1) ? MATRIX_A : 0);
+    }
+    const y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
+    mt[N - 1] = mt[M - 1] ^ (y >>> 1) ^ ((y & 1) ? MATRIX_A : 0);
+    this.mti = 0;
+  }
+  nextUint32() {
+    if (this.mti >= 624) this.generate();
+    let y = this.mt[this.mti++];
+    y ^= (y >>> 11);
+    y = (y ^ ((y << 7) & 0x9d2c5680)) >>> 0;
+    y = (y ^ ((y << 15) & 0xefc60000)) >>> 0;
+    y ^= (y >>> 18);
+    return y >>> 0;
+  }
+ 
+  randint(low, high) {
+    const maxVal = (high - low) - 1;
+    if (maxVal <= 0) return low;
+    let mask = maxVal;
+    mask |= mask >>> 1; mask |= mask >>> 2; mask |= mask >>> 4;
+    mask |= mask >>> 8; mask |= mask >>> 16;
+    let val;
+    do { val = this.nextUint32() & mask; } while (val > maxVal);
+    return low + val;
+  }
+  randintArray(low, high, size) {
+    const out = new Array(size);
+    for (let i = 0; i < size; i++) out[i] = this.randint(low, high);
+    return out;
+  }
+}
+
+const LCECore = {
+  passwordToSeedLayers(password) {
+    if (!/^[0-9]+$/.test(password) || password.length === 0 || password.length > 5) {
+      return { seed: 42, layers: 1 };
+    }
+    return { seed: parseInt(password, 10) % 999999999, layers: password.length };
+  },
+
+  encryptText(text, password) {
+    const { seed } = this.passwordToSeedLayers(password);
+    const rng = new NumpyRandom(seed);
+    const shifts = rng.randintArray(1, CHARS.length - 1, text.length);
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (Object.prototype.hasOwnProperty.call(CHAR_TO_IDX, c)) {
+        const idx = (CHAR_TO_IDX[c] + shifts[i]) % CHARS.length;
+        result += IDX_TO_CHAR[idx];
+      } else {
+        result += c;
+      }
+    }
+    return result;
+  },
+
+  decryptText(encrypted, password) {
+    const { seed } = this.passwordToSeedLayers(password);
+    const rng = new NumpyRandom(seed);
+    const shifts = rng.randintArray(1, CHARS.length - 1, encrypted.length);
+    let result = "";
+    for (let i = 0; i < encrypted.length; i++) {
+      const c = encrypted[i];
+      if (Object.prototype.hasOwnProperty.call(CHAR_TO_IDX, c)) {
+        let idx = (CHAR_TO_IDX[c] - shifts[i]) % CHARS.length;
+        if (idx < 0) idx += CHARS.length;
+        result += IDX_TO_CHAR[idx];
+      } else {
+        result += c;
+      }
+    }
+    return result;
+  },
+
+  textToAudio(text, password) {
+    const { seed, layers } = this.passwordToSeedLayers(password);
+    const encrypted = this.encryptText(text, password);
+    const sampleRate = 44100;
+    const charDuration = 0.095;
+    const samplesPerChar = Math.floor(sampleRate * charDuration);
+
+    void seed;
+
+    const chunks = [];
+    let totalLen = 0;
+
+    for (const char of encrypted) {
+      if (!Object.prototype.hasOwnProperty.call(CHAR_TO_IDX, char)) {
+        const silenceLen = Math.floor(sampleRate * charDuration * layers);
+        chunks.push({ type: "silence", len: silenceLen });
+        totalLen += silenceLen;
+        continue;
+      }
+      const idx = CHAR_TO_IDX[char];
+      for (let layer = 0; layer < layers; layer++) {
+        const freq = 380 + idx * 22 + layer * 67;
+        chunks.push({ type: "tone", freq, len: samplesPerChar });
+        totalLen += samplesPerChar;
+      }
+    }
+
+    const audio = new Float32Array(totalLen);
+    let pos = 0;
+    for (const chunk of chunks) {
+      if (chunk.type === "silence") {
+        pos += chunk.len; 
+      } else {
+        for (let n = 0; n < chunk.len; n++) {
+          const t = n / sampleRate;
+          audio[pos + n] = Math.sin(2 * Math.PI * chunk.freq * t) * 0.32;
+        }
+        pos += chunk.len;
+      }
+    }
+
+    let maxAbs = 0;
+    for (let i = 0; i < audio.length; i++) {
+      const a = Math.abs(audio[i]);
+      if (a > maxAbs) maxAbs = a;
+    }
+    if (maxAbs > 0) {
+      for (let i = 0; i < audio.length; i++) {
+        audio[i] = (audio[i] / maxAbs) * 0.95;
+      }
+    }
+
+    return { audio, encrypted, layers };
+  },
+
+  async audioToText(arrayBuffer, password) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const decoded = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+      const sr = decoded.sampleRate;
+
+      let samples;
+      if (decoded.numberOfChannels > 1) {
+        const ch0 = decoded.getChannelData(0);
+        const ch1 = decoded.getChannelData(1);
+        samples = new Float32Array(ch0.length);
+        for (let i = 0; i < ch0.length; i++) samples[i] = (ch0[i] + ch1[i]) / 2;
+      } else {
+        samples = decoded.getChannelData(0);
+      }
+
+      const { layers } = this.passwordToSeedLayers(password);
+      const charSamples = Math.floor(sr * 0.095);
+      const numChars = Math.floor(samples.length / (charSamples * layers));
+
+      const recovered = [];
+      for (let i = 0; i < numChars; i++) {
+        const start = i * charSamples * layers;
+        const block = samples.subarray(start, start + charSamples * layers);
+
+        const peakFreqs = new Array(layers);
+        for (let layer = 0; layer < layers; layer++) {
+          const seg = block.subarray(layer * charSamples, (layer + 1) * charSamples);
+          peakFreqs[layer] = this.dominantFreq(seg, sr);
+        }
+
+        let bestIdx = 0;
+        let bestScore = -Infinity;
+        for (let testIdx = 0; testIdx < CHARS.length; testIdx++) {
+          let score = 0;
+          for (let layer = 0; layer < layers; layer++) {
+            const expected = 380 + testIdx * 22 + layer * 67;
+            score -= Math.abs(peakFreqs[layer] - expected);
+          }
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = testIdx;
+          }
+        }
+        recovered.push(IDX_TO_CHAR[bestIdx]);
+      }
+
+      const encrypted = recovered.join("");
+      return this.decryptText(encrypted, password);
+    } catch (e) {
+      console.error(e);
+      return "Decoding Fail!";
+    }
+  },
+
+  dominantFreq(seg, sr) {
+    const N = seg.length;
+    if (N === 0) return 0;
+
+    let fftSize = 1;
+    while (fftSize < N) fftSize *= 2;
+
+    const re = new Float64Array(fftSize);
+    const im = new Float64Array(fftSize);
+    for (let i = 0; i < N; i++) re[i] = seg[i];
+
+    this.fft(re, im);
+
+    const half = fftSize / 2;
+    let maxMag = -1;
+    let maxBin = 0;
+    for (let k = 1; k <= half; k++) {
+      const mag = re[k] * re[k] + im[k] * im[k];
+      if (mag > maxMag) {
+        maxMag = mag;
+        maxBin = k;
+      }
+    }
+    return (maxBin * sr) / fftSize;
+  },
+
+  fft(re, im) {
+    const n = re.length;
+    if (n <= 1) return;
+
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) {
+        let tr = re[i]; re[i] = re[j]; re[j] = tr;
+        let ti = im[i]; im[i] = im[j]; im[j] = ti;
+      }
+    }
+
+    for (let len = 2; len <= n; len <<= 1) {
+      const ang = (-2 * Math.PI) / len;
+      const wRe = Math.cos(ang), wIe = Math.sin(ang);
+      for (let i = 0; i < n; i += len) {
+        let curRe = 1, curIe = 0;
+        for (let k = 0; k < len / 2; k++) {
+          const uRe = re[i + k], uIe = im[i + k];
+          const vRe = re[i + k + len/2] * curRe - im[i + k + len/2] * curIe;
+          const vIe = re[i + k + len/2] * curIe + im[i + k + len/2] * curRe;
+          re[i + k] = uRe + vRe;
+          im[i + k] = uIe + vIe;
+          re[i + k + len/2] = uRe - vRe;
+          im[i + k + len/2] = uIe - vIe;
+          const nextRe = curRe * wRe - curIe * wIe;
+          const nextIe = curRe * wIe + curIe * wRe;
+          curRe = nextRe; curIe = nextIe;
+        }
+      }
+    }
+  }
+};
+
+function encodeWav(samples, sampleRate) {
+  const numChannels = 1;
+  const bytesPerSample = 2;
+  const blockAlign = numChannels * bytesPerSample;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = samples.length * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+
+  function writeString(offset, str) {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); 
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, dataSize, true);
+
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++) {
+    let s = Math.max(-1, Math.min(1, samples[i]));
+    s = s < 0 ? s * 0x8000 : s * 0x7fff;
+    view.setInt16(offset, s, true);
+    offset += 2;
+  }
+
+  return buffer;
+}
+
+let currentFileBuffer = null;
+let currentFileName = null;
+
+function setStatus(text) {
+  document.getElementById("status").textContent = text;
+}
+
+function encodeAndSave() {
+  const message = document.getElementById("msgEntry").value.trim();
+  const password = document.getElementById("encPass").value.trim();
+
+  if (!message || !password) {
+    alert("Please enter message and password");
+    return;
+  }
+
+  try {
+    const { audio, layers } = LCECore.textToAudio(message, password);
+    const wavBuffer = encodeWav(audio, 44100);
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const defaultName = `LCE_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.wav`;
+
+    const blob = new Blob([wavBuffer], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = defaultName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setStatus(`Saved: ${defaultName}  |  Layers: ${layers}`);
+    alert(`File saved successfully!\n\n${defaultName}`);
+  } catch (e) {
+    alert("Error: " + e.message);
+  }
+}
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    currentFileBuffer = e.target.result;
+    currentFileName = file.name;
+    document.getElementById("fileLabel").textContent = file.name;
+    setStatus(`Loaded: ${file.name}`);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function decrypt() {
+  if (!currentFileBuffer) {
+    alert("Please load an audio file first");
+    return;
+  }
+  const password = document.getElementById("decPass").value.trim();
+  if (!password) {
+    alert("Enter password");
+    return;
+  }
+
+  setStatus("Decrypting...");
+  document.getElementById("resultBox").value = "";
+  await new Promise((r) => setTimeout(r, 30));
+
+  const result = await LCECore.audioToText(currentFileBuffer, password);
+  document.getElementById("resultBox").value = result;
+  setStatus("Decryption Complete");
+}
+
+function resetFields() {
+  document.getElementById("msgEntry").value = "";
+  document.getElementById("encPass").value = "";
+  document.getElementById("decPass").value = "";
+  document.getElementById("resultBox").value = "";
+  document.getElementById("fileLabel").textContent = "";
+  currentFileBuffer = null;
+  currentFileName = null;
+  setStatus("Ready");
+}
+</script>
+</body>
+</html>
